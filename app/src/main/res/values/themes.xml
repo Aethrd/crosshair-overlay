@@ -10,6 +10,15 @@
         <item name="colorAccent">@color/accent</item>
     </style>
 
+    <!-- ImportActivity exists only to host the system file picker, so it draws nothing. -->
+    <style name="Theme.Crosshair.Invisible" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowAnimationStyle">@null</item>
+        <item name="android:backgroundDimEnabled">false</item>
+    </style>
+
     <!-- Used for views inflated by the service, which has no activity theme of its own. -->
     <style name="Theme.Crosshair.Overlay" parent="android:Theme.DeviceDefault">
         <item name="android:textColorPrimary">@color/text</item>

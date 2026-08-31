@@ -31,7 +31,7 @@
     <!-- Panel -->
     <string name="panel_title">Crosshair</string>
     <string name="close">Close</string>
-    <string name="label_style">Style</string>
+    <string name="label_style">Crosshair</string>
     <string name="label_size">Size</string>
     <string name="label_opacity">Opacity</string>
     <string name="label_x">Horizontal</string>
@@ -46,7 +46,6 @@
     <string name="opacity_warning" formatted="false">Android 12 and newer block taps that land on the crosshair when a pass-through overlay is more than 80% opaque. Turn on max priority mode for solid 100%, or drop to 80%.</string>
     <string name="value_dp">%1$d dp</string>
     <string name="value_percent">%1$d%%</string>
-    <string name="crosshair_n">Crosshair %1$d</string>
     <string name="button_description">Crosshair controls</string>
     <string name="decrease">Decrease</string>
     <string name="increase">Increase</string>
@@ -65,4 +64,17 @@
     <string name="a11y_summary">Draws the crosshair one layer above normal app overlays.</string>
     <string name="a11y_description">Turn this on only if you want the crosshair to outrank other floating apps. It draws the crosshair and nothing else. It does not read the screen, record input, or collect any data.</string>
     <string name="a11y_toast">Find Crosshair in this list and turn it on.</string>
+
+    <!-- Image library -->
+    <string name="your_crosshairs">Your crosshairs</string>
+    <string name="library_body">Import any PNG, WebP or JPG. Transparent PNGs work best. Images are copied into the app, so moving or deleting the original afterwards is fine.</string>
+    <string name="import_image">Import image</string>
+    <string name="imported_crosshair">Imported crosshair</string>
+    <string name="picker_empty">Nothing imported yet. Tap + to add an image.</string>
+    <string name="crosshair_removed">Removed</string>
+    <string name="import_failed">That file could not be read as an image.</string>
+    <string name="import_no_picker">No file picker available on this device.</string>
+    <string name="library_none">None yet</string>
+    <string name="library_n">%1$d imported</string>
+    <string name="need_an_image">Import an image to get started</string>
 </resources>
