@@ -29,7 +29,7 @@
                 android:layout_width="28dp"
                 android:layout_height="28dp"
                 android:contentDescription="@null"
-                android:src="@drawable/ch_01" />
+                android:src="@drawable/ic_sigil" />
 
             <TextView
                 android:layout_width="0dp"
@@ -77,6 +77,17 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal" />
         </HorizontalScrollView>
+
+        <TextView
+            android:id="@+id/picker_empty"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:lineSpacingExtra="2dp"
+            android:text="@string/picker_empty"
+            android:textColor="@color/muted"
+            android:textSize="12sp"
+            android:visibility="gone" />
 
         <!-- Size -->
         <LinearLayout
