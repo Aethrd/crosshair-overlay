@@ -112,9 +112,46 @@
                 android:layout_height="wrap_content" />
         </LinearLayout>
 
-        <SeekBar
-            android:id="@+id/seek_size"
-            style="@style/Slider" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/step_size_minus"
+                android:layout_width="34dp"
+                android:layout_height="34dp"
+                android:background="@drawable/bg_step"
+                android:clickable="true"
+                android:contentDescription="@string/decrease"
+                android:focusable="true"
+                android:gravity="center"
+                android:text="−"
+                android:textColor="@color/text"
+                android:textSize="17sp" />
+
+            <SeekBar
+                android:id="@+id/seek_size"
+                style="@style/Slider"
+                android:layout_width="0dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_weight="1" />
+
+            <TextView
+                android:id="@+id/step_size_plus"
+                android:layout_width="34dp"
+                android:layout_height="34dp"
+                android:background="@drawable/bg_step"
+                android:clickable="true"
+                android:contentDescription="@string/increase"
+                android:focusable="true"
+                android:gravity="center"
+                android:text="+"
+                android:textColor="@color/text"
+                android:textSize="17sp" />
+        </LinearLayout>
 
         <!-- Opacity -->
         <LinearLayout
