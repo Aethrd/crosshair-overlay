@@ -26,8 +26,12 @@ class CrosshairLayer(
 ) {
 
     private val wm = context.windowManager()
+    private val library = Library(context)
     private var view: ImageView? = null
     private var params: WindowManager.LayoutParams? = null
+
+    /** Which image is currently decoded into the view, so slider drags do not re-decode. */
+    private var loadedName: String? = null
 
     /** Called with the new centre offset while the crosshair is being dragged. */
     var onMoved: ((x: Int, y: Int) -> Unit)? = null
@@ -38,6 +42,11 @@ class CrosshairLayer(
 
     /** Adds the window if needed, then pushes the current settings into it. */
     fun show(prefs: Prefs) {
+        // Nothing to draw until the user has imported at least one image.
+        if (library.file(prefs.selected) == null) {
+            hide()
+            return
+        }
         if (view == null) attach()
         update(prefs)
     }
@@ -59,7 +68,20 @@ class CrosshairLayer(
         // but leaves the window at alpha 1.0, so taps would get blocked at every setting.
         p.alpha = prefs.opacity / 100f
 
-        v.setImageResource(Catalog.at(prefs.index))
+        val file = library.file(prefs.selected)
+        if (file == null) {
+            hide()
+            return
+        }
+        if (loadedName != prefs.selected) {
+            val bitmap = Library.decode(file, Library.DISPLAY_PX)
+            if (bitmap == null) {
+                hide()
+                return
+            }
+            v.setImageBitmap(bitmap)
+            loadedName = prefs.selected
+        }
 
         runCatching { wm.updateViewLayout(v, p) }
     }
@@ -68,6 +90,7 @@ class CrosshairLayer(
         view?.let { v -> runCatching { wm.removeViewImmediate(v) } }
         view = null
         params = null
+        loadedName = null
     }
 
     /**

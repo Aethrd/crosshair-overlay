@@ -12,10 +12,10 @@ class Prefs(context: Context) {
     private val sp = context.applicationContext
         .getSharedPreferences("crosshair", Context.MODE_PRIVATE)
 
-    /** Index into [Catalog]. */
-    var index: Int
-        get() = sp.getInt(KEY_INDEX, 0).coerceIn(0, Catalog.size - 1)
-        set(value) = sp.edit { putInt(KEY_INDEX, value.coerceIn(0, Catalog.size - 1)) }
+    /** File name of the selected image in [Library]. Empty when nothing is imported yet. */
+    var selected: String
+        get() = sp.getString(KEY_SELECTED, "").orEmpty()
+        set(value) = sp.edit { putString(KEY_SELECTED, value) }
 
     /** Crosshair edge length in dp. */
     var sizeDp: Int
@@ -65,12 +65,14 @@ class Prefs(context: Context) {
     }
 
     companion object {
-        const val MIN_SIZE = 16
-        const val MAX_SIZE = 480
-        const val DEFAULT_SIZE = 72
+        // Wide range on purpose: a 4dp aiming dot and a near full screen reticle are both
+        // legitimate uses, and imported artwork varies enormously in how much padding it has.
+        const val MIN_SIZE = 4
+        const val MAX_SIZE = 1200
+        const val DEFAULT_SIZE = 96
         const val MIN_OPACITY = 5
 
-        private const val KEY_INDEX = "index"
+        private const val KEY_SELECTED = "selected"
         private const val KEY_SIZE = "size_dp"
         private const val KEY_OPACITY = "opacity"
         private const val KEY_X = "offset_x"

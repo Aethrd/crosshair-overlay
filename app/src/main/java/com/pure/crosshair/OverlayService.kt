@@ -35,6 +35,7 @@ import kotlin.math.hypot
 class OverlayService : Service(), ControlPanel.Callbacks {
 
     private lateinit var prefs: Prefs
+    private lateinit var library: Library
     private val wm by lazy { windowManager() }
     private val handler = Handler(Looper.getMainLooper())
 
@@ -48,6 +49,7 @@ class OverlayService : Service(), ControlPanel.Callbacks {
     override fun onCreate() {
         super.onCreate()
         prefs = Prefs(this)
+        library = Library(this)
 
         createChannel()
         goForeground()
@@ -117,7 +119,8 @@ class OverlayService : Service(), ControlPanel.Callbacks {
                 it.onMoved = ::onCrosshairMoved
                 layer = it
             }
-            if (prefs.visible) current.show(prefs) else current.hide()
+            val hasImage = library.file(prefs.selected) != null
+            if (prefs.visible && hasImage) current.show(prefs) else current.hide()
         }
 
         updateNotification()
@@ -151,6 +154,30 @@ class OverlayService : Service(), ControlPanel.Callbacks {
         stopSelf()
     }
 
+    override fun onImportRequested() {
+        // The panel is an overlay window, so it would sit on top of the file picker.
+        panel?.hide()
+        runCatching {
+            startActivity(
+                Intent(this, ImportActivity::class.java)
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_NO_ANIMATION)
+            )
+        }
+    }
+
+    /** Called after an image is imported or deleted. */
+    fun onLibraryChanged() {
+        handler.post {
+            if (panel?.isShowing == true) {
+                panel?.reloadLibrary()
+            } else {
+                panel?.show()
+                panel?.syncFromPrefs()
+            }
+            applyConfig()
+        }
+    }
+
     private fun activeLayer(): CrosshairLayer? =
         if (prefs.maxPriority && Bridge.maxPriorityConnected) {
             Bridge.maxPriority?.layer
@@ -166,8 +193,7 @@ class OverlayService : Service(), ControlPanel.Callbacks {
         val screen = screenSize()
 
         val image = ImageView(this).apply {
-            // Entry 0 of the sheet, matching the launcher icon.
-            setImageResource(Catalog.at(0))
+            setImageResource(R.drawable.ic_sigil)
             scaleType = ImageView.ScaleType.FIT_CENTER
             alpha = BUTTON_IDLE_ALPHA
             contentDescription = getString(R.string.button_description)

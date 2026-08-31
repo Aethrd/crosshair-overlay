@@ -13,6 +13,8 @@ import android.view.View
 import android.view.WindowManager
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.TextView
+import android.widget.Toast
 import android.widget.SeekBar
 import com.pure.crosshair.databinding.OverlayPanelBinding
 
@@ -32,6 +34,9 @@ class ControlPanel(
         /** A value changed and the crosshair needs redrawing. */
         fun onConfigChanged()
 
+        /** The user tapped the import tile. */
+        fun onImportRequested()
+
         /** Move mode was switched on or off. */
         fun onMoveModeChanged(enabled: Boolean)
 
@@ -40,7 +45,9 @@ class ControlPanel(
     }
 
     private val wm = context.windowManager()
+    private val library = Library(context)
     private var binding: OverlayPanelBinding? = null
+    private var themed: Context? = null
 
     /** Guards against slider listeners firing while we push values in programmatically. */
     private var syncing = false
@@ -57,6 +64,7 @@ class ControlPanel(
         if (isShowing) return
 
         val themed = ContextThemeWrapper(context, R.style.Theme_Crosshair_Overlay)
+        this.themed = themed
         val b = OverlayPanelBinding.inflate(LayoutInflater.from(themed))
         binding = b
 
@@ -72,7 +80,7 @@ class ControlPanel(
             windowAnimations = 0
         }
 
-        buildPicker(b, themed)
+        buildPicker(b)
         wireControls(b)
         syncFromPrefs()
 
@@ -181,38 +189,84 @@ class ControlPanel(
 
     // ---------------------------------------------------------------- internals
 
-    private fun buildPicker(b: OverlayPanelBinding, themed: Context) {
+    /** Called after an import or delete so the strip reflects the library. */
+    fun reloadLibrary() {
+        val b = binding ?: return
+        buildPicker(b)
+        syncFromPrefs()
+    }
+
+    private fun buildPicker(b: OverlayPanelBinding) {
+        val themed = this.themed ?: return
         val cell = context.dp(48)
         val gap = context.dp(6)
         val pad = context.dp(6)
 
-        for (i in 0 until Catalog.size) {
+        b.pickerRow.removeAllViews()
+
+        // Import tile always sits first, so there is a way in even when the library is empty.
+        val add = TextView(themed).apply {
+            layoutParams = LinearLayout.LayoutParams(cell, cell).also { it.marginEnd = gap }
+            text = "+"
+            gravity = Gravity.CENTER
+            textSize = 22f
+            setTextColor(context.getColor(R.color.accent))
+            setBackgroundResource(R.drawable.bg_thumb)
+            contentDescription = context.getString(R.string.import_image)
+            setOnClickListener { callbacks.onImportRequested() }
+        }
+        b.pickerRow.addView(add)
+
+        val images = library.list()
+        b.pickerEmpty.visibility = if (images.isEmpty()) View.VISIBLE else View.GONE
+
+        for (file in images) {
+            val bitmap = Library.decode(file, Library.THUMB_PX) ?: continue
             val thumb = ImageView(themed).apply {
                 layoutParams = LinearLayout.LayoutParams(cell, cell).also { it.marginEnd = gap }
                 setPadding(pad, pad, pad, pad)
-                setImageResource(Catalog.at(i))
+                setImageBitmap(bitmap)
                 setBackgroundResource(R.drawable.bg_thumb)
                 scaleType = ImageView.ScaleType.FIT_CENTER
-                contentDescription = context.getString(R.string.crosshair_n, i + 1)
+                isSelected = file.name == prefs.selected
+                contentDescription = context.getString(R.string.imported_crosshair)
                 setOnClickListener {
-                    prefs.index = i
+                    prefs.selected = file.name
                     updatePickerSelection(b)
                     callbacks.onConfigChanged()
+                }
+                setOnLongClickListener {
+                    removeImage(file.name)
+                    true
                 }
             }
             b.pickerRow.addView(thumb)
         }
     }
 
+    /** Long press deletes. The original file on the device is untouched. */
+    private fun removeImage(name: String) {
+        val fallback = library.neighbourOf(name)
+        library.delete(name)
+        if (prefs.selected == name) prefs.selected = fallback.orEmpty()
+        Toast.makeText(context, R.string.crosshair_removed, Toast.LENGTH_SHORT).show()
+        reloadLibrary()
+        callbacks.onConfigChanged()
+    }
+
     private fun updatePickerSelection(b: OverlayPanelBinding) {
-        for (i in 0 until b.pickerRow.childCount) {
-            b.pickerRow.getChildAt(i).isSelected = (i == prefs.index)
+        val images = library.list()
+        // Child 0 is the import tile, so image i lives at child i + 1.
+        for (i in images.indices) {
+            b.pickerRow.getChildAt(i + 1)?.isSelected = images[i].name == prefs.selected
         }
     }
 
     private fun scrollPickerToSelection(b: OverlayPanelBinding) {
         b.pickerScroll.post {
-            val child = b.pickerRow.getChildAt(prefs.index) ?: return@post
+            val index = library.list().indexOfFirst { it.name == prefs.selected }
+            if (index < 0) return@post
+            val child = b.pickerRow.getChildAt(index + 1) ?: return@post
             b.pickerScroll.smoothScrollTo(
                 child.left - b.pickerScroll.width / 2 + child.width / 2,
                 0

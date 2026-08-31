@@ -19,6 +19,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var prefs: Prefs
+    private lateinit var library: Library
 
     private val requestNotifications =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) {
@@ -31,8 +32,12 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         prefs = Prefs(this)
+        library = Library(this)
 
         binding.btnGrant.setOnClickListener { requestOverlayPermission() }
+        binding.btnImport.setOnClickListener {
+            startActivity(Intent(this, ImportActivity::class.java))
+        }
         binding.btnPrimary.setOnClickListener { onPrimaryClicked() }
         binding.btnPriority.setOnClickListener { onPriorityClicked() }
         binding.btnBoot.setOnClickListener {
@@ -70,7 +75,18 @@ class MainActivity : AppCompatActivity() {
         binding.btnPrimary.isEnabled = granted
         binding.btnPrimary.alpha = if (granted) 1f else 0.4f
 
-        binding.statusLine.setText(if (running) R.string.running else R.string.not_running)
+        val images = library.list().size
+        binding.libraryCount.text =
+            if (images == 0) getString(R.string.library_none)
+            else getString(R.string.library_n, images)
+
+        binding.statusLine.setText(
+            when {
+                images == 0 -> R.string.need_an_image
+                running -> R.string.running
+                else -> R.string.not_running
+            }
+        )
 
         val priorityOn = prefs.maxPriority && isMaxPriorityEnabled()
         binding.btnPriority.isSelected = priorityOn
