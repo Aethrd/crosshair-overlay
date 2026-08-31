@@ -3,7 +3,12 @@ package com.pure.crosshair
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.ImageDecoder
+import android.graphics.drawable.AnimatedImageDrawable
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Drawable
 import android.net.Uri
+import android.os.Build
 import java.io.File
 
 /**
@@ -97,6 +102,40 @@ class Library(context: Context) {
             val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
             runCatching { BitmapFactory.decodeFile(file.path, bounds) }
             return bounds.outWidth > 0 && bounds.outHeight > 0
+        }
+
+        /**
+         * Loads an image for display, keeping animation where the platform supports it.
+         *
+         * ImageDecoder returns an AnimatedImageDrawable for animated GIF and WebP on API 28+.
+         * On 26 and 27 there is no such API, so those fall back to the first frame, which still
+         * looks like a normal static crosshair rather than failing.
+         */
+        fun loadDrawable(context: Context, file: File): Drawable? {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                val decoded = runCatching {
+                    ImageDecoder.decodeDrawable(ImageDecoder.createSource(file)) { decoder, info, _ ->
+                        val longest = maxOf(info.size.width, info.size.height)
+                        if (longest > DISPLAY_PX) {
+                            val scale = DISPLAY_PX.toFloat() / longest
+                            decoder.setTargetSize(
+                                (info.size.width * scale).toInt().coerceAtLeast(1),
+                                (info.size.height * scale).toInt().coerceAtLeast(1)
+                            )
+                        }
+                    }
+                }.getOrNull()
+
+                if (decoded != null) {
+                    if (decoded is AnimatedImageDrawable) {
+                        decoded.repeatCount = AnimatedImageDrawable.REPEAT_INFINITE
+                    }
+                    return decoded
+                }
+            }
+
+            val bitmap = decode(file, DISPLAY_PX) ?: return null
+            return BitmapDrawable(context.resources, bitmap)
         }
 
         /** Long edge used for the on screen crosshair. */

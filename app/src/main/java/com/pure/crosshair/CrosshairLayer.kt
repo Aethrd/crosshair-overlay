@@ -3,6 +3,7 @@ package com.pure.crosshair
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.PixelFormat
+import android.graphics.drawable.AnimatedImageDrawable
 import android.os.Build
 import android.view.Gravity
 import android.view.MotionEvent
@@ -74,12 +75,14 @@ class CrosshairLayer(
             return
         }
         if (loadedName != prefs.selected) {
-            val bitmap = Library.decode(file, Library.DISPLAY_PX)
-            if (bitmap == null) {
+            val drawable = Library.loadDrawable(context, file)
+            if (drawable == null) {
                 hide()
                 return
             }
-            v.setImageBitmap(bitmap)
+            v.setImageDrawable(drawable)
+            // Animated GIF and WebP do not play until told to.
+            (drawable as? AnimatedImageDrawable)?.start()
             loadedName = prefs.selected
         }
 
@@ -87,6 +90,7 @@ class CrosshairLayer(
     }
 
     fun hide() {
+        (view?.drawable as? AnimatedImageDrawable)?.stop()
         view?.let { v -> runCatching { wm.removeViewImmediate(v) } }
         view = null
         params = null

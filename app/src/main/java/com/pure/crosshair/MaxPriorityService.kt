@@ -1,6 +1,9 @@
 package com.pure.crosshair
 
 import android.accessibilityservice.AccessibilityService
+import android.content.res.Configuration
+import android.os.Handler
+import android.os.Looper
 import android.view.accessibility.AccessibilityEvent
 
 /**
@@ -26,6 +29,14 @@ class MaxPriorityService : AccessibilityService() {
         Bridge.maxPriority = this
         // Hand the crosshair over from OverlayService if it is currently drawing one.
         Bridge.refresh()
+    }
+
+    /** Same rotation problem as OverlayService: reload the offsets for the new orientation. */
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        val handler = Handler(Looper.getMainLooper())
+        handler.post { applyConfig() }
+        handler.postDelayed({ applyConfig() }, 350L)
     }
 
     override fun onUnbind(intent: android.content.Intent?): Boolean {

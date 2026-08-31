@@ -10,6 +10,7 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ServiceInfo
+import android.content.res.Configuration
 import android.graphics.PixelFormat
 import android.os.Build
 import android.os.Handler
@@ -86,6 +87,41 @@ class OverlayService : Service(), ControlPanel.Callbacks {
             }
         }
         return START_STICKY
+    }
+
+    /**
+     * Windows keep their pixel coordinates across a rotation, so anything positioned near an edge
+     * in one orientation lands off screen in the other. Positions are stored per orientation, and
+     * this pulls the new set in once the display metrics have caught up.
+     */
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        // The callback can arrive before WindowManager reports the new size, so run it twice.
+        handler.post { reposition() }
+        handler.postDelayed({ reposition() }, ROTATION_SETTLE_MS)
+    }
+
+    private fun reposition() {
+        val screen = screenSize()
+
+        button?.let { v ->
+            buttonParams?.let { lp ->
+                val savedX = prefs.buttonX
+                val savedY = prefs.buttonY
+                lp.x = (if (savedX == Int.MIN_VALUE) screen.x - lp.width - dp(8) else savedX)
+                    .coerceIn(0, (screen.x - lp.width).coerceAtLeast(0))
+                lp.y = (if (savedY == Int.MIN_VALUE) screen.y / 3 else savedY)
+                    .coerceIn(0, (screen.y - lp.height).coerceAtLeast(0))
+                runCatching { wm.updateViewLayout(v, lp) }
+                prefs.buttonX = lp.x
+                prefs.buttonY = lp.y
+            }
+        }
+
+        // Re-reads the offsets for the orientation we are now in.
+        Bridge.refresh()
+        // Slider ranges depend on screen width and height, so they change too.
+        panel?.syncFromPrefs()
     }
 
     override fun onDestroy() {
@@ -288,7 +324,13 @@ class OverlayService : Service(), ControlPanel.Callbacks {
                         .setDuration(140).start()
 
                     if (dragging) {
-                        snapToEdge(view, lp)
+                        if (prefs.snapButtonToEdge) {
+                            snapToEdge(view, lp)
+                        } else {
+                            // Leave it exactly where it was dropped, middle of the screen included.
+                            prefs.buttonX = lp.x
+                            prefs.buttonY = lp.y
+                        }
                     } else if (!longPressFired && event.actionMasked == MotionEvent.ACTION_UP) {
                         panel?.let { p ->
                             if (p.isShowing) p.hide() else { p.show(); p.syncFromPrefs() }
@@ -302,7 +344,7 @@ class OverlayService : Service(), ControlPanel.Callbacks {
         }
     }
 
-    /** Slides the button to whichever side edge it is closest to. */
+    /** Slides the button to whichever side edge it is closest to. Opt in via settings. */
     private fun snapToEdge(view: View, lp: WindowManager.LayoutParams) {
         val screen = screenSize()
         val margin = dp(8)
@@ -403,6 +445,9 @@ class OverlayService : Service(), ControlPanel.Callbacks {
         private const val NOTIFICATION_ID = 41
         private const val BUTTON_DP = 46
         private const val BUTTON_IDLE_ALPHA = 0.85f
+
+        /** Grace period for the display metrics to update after a rotation. */
+        private const val ROTATION_SETTLE_MS = 350L
 
         @Volatile
         var isRunning = false

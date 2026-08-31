@@ -40,6 +40,10 @@ class MainActivity : AppCompatActivity() {
         }
         binding.btnPrimary.setOnClickListener { onPrimaryClicked() }
         binding.btnPriority.setOnClickListener { onPriorityClicked() }
+        binding.btnSnap.setOnClickListener {
+            prefs.snapButtonToEdge = !prefs.snapButtonToEdge
+            refresh()
+        }
         binding.btnBoot.setOnClickListener {
             prefs.startOnBoot = !prefs.startOnBoot
             refresh()
@@ -97,6 +101,9 @@ class MainActivity : AppCompatActivity() {
                 else -> R.string.setup
             }
         )
+
+        binding.btnSnap.isSelected = prefs.snapButtonToEdge
+        binding.btnSnap.setText(if (prefs.snapButtonToEdge) R.string.on else R.string.off)
 
         binding.btnBoot.isSelected = prefs.startOnBoot
         binding.btnBoot.setText(if (prefs.startOnBoot) R.string.on else R.string.off)

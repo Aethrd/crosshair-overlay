@@ -9,8 +9,22 @@ import androidx.core.content.edit
  */
 class Prefs(context: Context) {
 
-    private val sp = context.applicationContext
-        .getSharedPreferences("crosshair", Context.MODE_PRIVATE)
+    private val app = context.applicationContext
+    private val sp = app.getSharedPreferences("crosshair", Context.MODE_PRIVATE)
+
+    /**
+     * Positions are stored per orientation. A pixel offset that centres the crosshair nicely in
+     * portrait points somewhere else entirely once width and height swap, so landscape gets its
+     * own set of values rather than inheriting broken ones.
+     *
+     * Orientation is derived from real screen metrics instead of Configuration, because the
+     * Configuration attached to a Service context is not always current at the moment we read it.
+     */
+    private val orientation: String
+        get() {
+            val size = app.screenSize()
+            return if (size.x > size.y) "_land" else "_port"
+        }
 
     /** File name of the selected image in [Library]. Empty when nothing is imported yet. */
     var selected: String
@@ -27,26 +41,31 @@ class Prefs(context: Context) {
         get() = sp.getInt(KEY_OPACITY, 100).coerceIn(MIN_OPACITY, 100)
         set(value) = sp.edit { putInt(KEY_OPACITY, value.coerceIn(MIN_OPACITY, 100)) }
 
-    /** Pixel offset from the exact centre of the screen. */
+    /** Pixel offset from the exact centre of the screen, per orientation. */
     var offsetX: Int
-        get() = sp.getInt(KEY_X, 0)
-        set(value) = sp.edit { putInt(KEY_X, value) }
+        get() = sp.getInt(KEY_X + orientation, 0)
+        set(value) = sp.edit { putInt(KEY_X + orientation, value) }
 
     var offsetY: Int
-        get() = sp.getInt(KEY_Y, 0)
-        set(value) = sp.edit { putInt(KEY_Y, value) }
+        get() = sp.getInt(KEY_Y + orientation, 0)
+        set(value) = sp.edit { putInt(KEY_Y + orientation, value) }
 
     var visible: Boolean
         get() = sp.getBoolean(KEY_VISIBLE, true)
         set(value) = sp.edit { putBoolean(KEY_VISIBLE, value) }
 
     var buttonX: Int
-        get() = sp.getInt(KEY_BTN_X, Int.MIN_VALUE)
-        set(value) = sp.edit { putInt(KEY_BTN_X, value) }
+        get() = sp.getInt(KEY_BTN_X + orientation, Int.MIN_VALUE)
+        set(value) = sp.edit { putInt(KEY_BTN_X + orientation, value) }
 
     var buttonY: Int
-        get() = sp.getInt(KEY_BTN_Y, Int.MIN_VALUE)
-        set(value) = sp.edit { putInt(KEY_BTN_Y, value) }
+        get() = sp.getInt(KEY_BTN_Y + orientation, Int.MIN_VALUE)
+        set(value) = sp.edit { putInt(KEY_BTN_Y + orientation, value) }
+
+    /** When off, the floating button stays wherever it is dropped, including mid screen. */
+    var snapButtonToEdge: Boolean
+        get() = sp.getBoolean(KEY_SNAP, false)
+        set(value) = sp.edit { putBoolean(KEY_SNAP, value) }
 
     var startOnBoot: Boolean
         get() = sp.getBoolean(KEY_BOOT, false)
@@ -57,10 +76,11 @@ class Prefs(context: Context) {
         get() = sp.getBoolean(KEY_MAX_PRIORITY, false)
         set(value) = sp.edit { putBoolean(KEY_MAX_PRIORITY, value) }
 
+    /** Recentres the crosshair in the current orientation only. */
     fun resetPlacement() {
         sp.edit {
-            putInt(KEY_X, 0)
-            putInt(KEY_Y, 0)
+            putInt(KEY_X + orientation, 0)
+            putInt(KEY_Y + orientation, 0)
         }
     }
 
@@ -82,5 +102,6 @@ class Prefs(context: Context) {
         private const val KEY_BTN_Y = "button_y"
         private const val KEY_BOOT = "start_on_boot"
         private const val KEY_MAX_PRIORITY = "max_priority"
+        private const val KEY_SNAP = "snap_button"
     }
 }
