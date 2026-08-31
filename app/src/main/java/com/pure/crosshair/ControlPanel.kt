@@ -4,6 +4,8 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.PixelFormat
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import android.view.ContextThemeWrapper
 import android.view.Gravity
 import android.view.KeyEvent
@@ -17,6 +19,9 @@ import android.widget.TextView
 import android.widget.Toast
 import android.widget.SeekBar
 import com.pure.crosshair.databinding.OverlayPanelBinding
+import kotlin.math.ln
+import kotlin.math.pow
+import kotlin.math.roundToInt
 
 /**
  * The tuning panel that opens from the floating button.
@@ -147,8 +152,8 @@ class ControlPanel(
         val screen = context.screenSize()
 
         syncing = true
-        b.seekSize.max = Prefs.MAX_SIZE - Prefs.MIN_SIZE
-        b.seekSize.progress = prefs.sizeDp - Prefs.MIN_SIZE
+        b.seekSize.max = SIZE_STEPS
+        b.seekSize.progress = sizeToProgress(prefs.sizeDp)
 
         b.seekOpacity.max = 100 - Prefs.MIN_OPACITY
         b.seekOpacity.progress = prefs.opacity - Prefs.MIN_OPACITY
@@ -295,7 +300,7 @@ class ControlPanel(
         b.btnStop.setOnClickListener { callbacks.onStopRequested() }
 
         b.seekSize.setOnSeekBarChangeListener(onChange { value ->
-            prefs.sizeDp = Prefs.MIN_SIZE + value
+            prefs.sizeDp = progressToSize(value)
             b.valueSize.text = context.getString(R.string.value_dp, prefs.sizeDp)
         })
 
@@ -315,10 +320,82 @@ class ControlPanel(
             b.valueY.text = signed(prefs.offsetY)
         })
 
-        b.stepXMinus.setOnClickListener { nudgeX(b, -1) }
-        b.stepXPlus.setOnClickListener { nudgeX(b, 1) }
-        b.stepYMinus.setOnClickListener { nudgeY(b, -1) }
-        b.stepYPlus.setOnClickListener { nudgeY(b, 1) }
+        repeatWhileHeld(b.stepSizeMinus) { nudgeSize(b, -1) }
+        repeatWhileHeld(b.stepSizePlus) { nudgeSize(b, 1) }
+        repeatWhileHeld(b.stepXMinus) { nudgeX(b, -1) }
+        repeatWhileHeld(b.stepXPlus) { nudgeX(b, 1) }
+        repeatWhileHeld(b.stepYMinus) { nudgeY(b, -1) }
+        repeatWhileHeld(b.stepYPlus) { nudgeY(b, 1) }
+    }
+
+    /**
+     * The size range spans 4dp to 1200dp. Mapped linearly onto a slider a few hundred pixels
+     * wide, one pixel of travel is several dp, which makes any specific value unreachable.
+     * A logarithmic curve gives the small sizes most of the track, where the useful values are,
+     * and compresses the rarely used top end.
+     */
+    private fun sizeToProgress(sizeDp: Int): Int {
+        val min = Prefs.MIN_SIZE.toDouble()
+        val ratio = Prefs.MAX_SIZE.toDouble() / min
+        val clamped = sizeDp.coerceIn(Prefs.MIN_SIZE, Prefs.MAX_SIZE)
+        return ((ln(clamped / min) / ln(ratio)) * SIZE_STEPS).roundToInt()
+            .coerceIn(0, SIZE_STEPS)
+    }
+
+    private fun progressToSize(progress: Int): Int {
+        val min = Prefs.MIN_SIZE.toDouble()
+        val ratio = Prefs.MAX_SIZE.toDouble() / min
+        val t = progress.toDouble() / SIZE_STEPS
+        return (min * ratio.pow(t)).roundToInt().coerceIn(Prefs.MIN_SIZE, Prefs.MAX_SIZE)
+    }
+
+    /** Exactly one dp per press, so the slider gets you close and these land it. */
+    private fun nudgeSize(b: OverlayPanelBinding, delta: Int) {
+        prefs.sizeDp = (prefs.sizeDp + delta).coerceIn(Prefs.MIN_SIZE, Prefs.MAX_SIZE)
+        syncing = true
+        b.seekSize.progress = sizeToProgress(prefs.sizeDp)
+        syncing = false
+        b.valueSize.text = context.getString(R.string.value_dp, prefs.sizeDp)
+        callbacks.onConfigChanged()
+    }
+
+    /**
+     * Fires once on press, then repeats with an accelerating rate while held, so covering a
+     * few hundred dp does not mean a few hundred taps.
+     */
+    @SuppressLint("ClickableViewAccessibility")
+    private fun repeatWhileHeld(view: View, action: () -> Unit) {
+        val handler = Handler(Looper.getMainLooper())
+        var pending: Runnable? = null
+
+        view.setOnTouchListener { v, event ->
+            when (event.actionMasked) {
+                MotionEvent.ACTION_DOWN -> {
+                    action()
+                    val repeater = object : Runnable {
+                        var delay = REPEAT_FIRST_MS
+                        override fun run() {
+                            action()
+                            delay = (delay * REPEAT_DECAY).toLong().coerceAtLeast(REPEAT_MIN_MS)
+                            handler.postDelayed(this, delay)
+                        }
+                    }
+                    pending = repeater
+                    handler.postDelayed(repeater, REPEAT_FIRST_MS)
+                    v.isPressed = true
+                    true
+                }
+
+                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                    pending?.let { handler.removeCallbacks(it) }
+                    pending = null
+                    v.isPressed = false
+                    true
+                }
+
+                else -> true
+            }
+        }
     }
 
     private fun nudgeX(b: OverlayPanelBinding, delta: Int) {
@@ -365,5 +442,13 @@ class ControlPanel(
     companion object {
         /** Matches the platform default for InputManager#getMaximumObscuringOpacityForTouch. */
         private const val MAX_PASS_THROUGH_OPACITY = 80
+
+        /** Slider resolution. Combined with the log curve this is well under 1dp per step
+         *  through the range people actually use. */
+        private const val SIZE_STEPS = 1000
+
+        private const val REPEAT_FIRST_MS = 380L
+        private const val REPEAT_MIN_MS = 35L
+        private const val REPEAT_DECAY = 0.80f
     }
 }
