@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Crosshair</string>
+
+    <!-- Main screen -->
+    <string name="tagline">A crosshair that sits on top of everything and never eats a tap.</string>
+    <string name="perm_title">Display over other apps</string>
+    <string name="perm_granted">Granted</string>
+    <string name="perm_missing">Not granted</string>
+    <string name="perm_body">Android needs this before anything can be drawn on top of another app.</string>
+    <string name="grant">Grant permission</string>
+    <string name="start_overlay">Start overlay</string>
+    <string name="stop_overlay">Stop overlay</string>
+    <string name="running">Overlay is running</string>
+    <string name="not_running">Overlay is off</string>
+
+    <string name="option_priority_title">Max priority mode</string>
+    <string name="option_priority_body">Draws the crosshair from an accessibility service, one layer above normal app overlays. Useful if another floating app keeps covering it. Optional.</string>
+    <string name="option_snap_title">Snap button to edge</string>
+    <string name="option_snap_body">Off by default, so the floating button stays wherever you drop it, middle of the screen included. Turn on to have it spring back to the nearest side.</string>
+    <string name="option_boot_title">Start after reboot</string>
+    <string name="option_boot_body">Brings the overlay back on its own when the phone restarts.</string>
+    <string name="on">On</string>
+    <string name="off">Off</string>
+    <string name="setup">Set up</string>
+
+    <string name="howto_title">How it works</string>
+    <string name="howto_1">Tap the floating sigil to open the tuning panel.</string>
+    <string name="howto_2">Drag the sigil anywhere on screen, including the middle.</string>
+    <string name="howto_3">Long press it to show or hide the crosshair without opening anything.</string>
+    <string name="footer">The crosshair is always click through, at every opacity including 100%. Taps land on the app underneath.</string>
+
+    <!-- Panel -->
+    <string name="panel_title">Crosshair</string>
+    <string name="close">Close</string>
+    <string name="label_style">Crosshair</string>
+    <string name="label_size">Size</string>
+    <string name="label_opacity">Opacity</string>
+    <string name="label_x">Horizontal</string>
+    <string name="label_y">Vertical</string>
+    <string name="crosshair_on">Crosshair on</string>
+    <string name="crosshair_off">Crosshair off</string>
+    <string name="move">Move</string>
+    <string name="move_done">Done</string>
+    <string name="center">Center</string>
+    <string name="stop">Stop</string>
+    <string name="move_hint">Drag the crosshair to place it. Tap it once to snap back to center.</string>
+    <string name="opacity_warning" formatted="false">Android 12 and newer block taps that land on the crosshair when a pass-through overlay is more than 80% opaque. Turn on max priority mode for solid 100%, or drop to 80%.</string>
+    <string name="value_dp">%1$d dp</string>
+    <string name="value_percent">%1$d%%</string>
+    <string name="button_description">Crosshair controls</string>
+    <string name="decrease">Decrease</string>
+    <string name="increase">Increase</string>
+
+    <!-- Notification -->
+    <string name="channel_name">Overlay</string>
+    <string name="channel_description">Keeps the crosshair on screen while you use other apps.</string>
+    <string name="notif_showing">Crosshair showing</string>
+    <string name="notif_hidden">Crosshair hidden</string>
+    <string name="action_show">Show</string>
+    <string name="action_hide">Hide</string>
+    <string name="action_stop">Stop</string>
+
+    <!-- Accessibility service -->
+    <string name="a11y_label">Crosshair max priority</string>
+    <string name="a11y_summary">Draws the crosshair one layer above normal app overlays.</string>
+    <string name="a11y_description">Turn this on only if you want the crosshair to outrank other floating apps. It draws the crosshair and nothing else. It does not read the screen, record input, or collect any data.</string>
+    <string name="a11y_toast">Find Crosshair in this list and turn it on.</string>
+
+    <!-- Image library -->
+    <string name="your_crosshairs">Your crosshairs</string>
+    <string name="library_body">Import any PNG, WebP or JPG. Transparent PNGs work best. Images are copied into the app, so moving or deleting the original afterwards is fine.</string>
+    <string name="import_image">Import image</string>
+    <string name="imported_crosshair">Imported crosshair</string>
+    <string name="picker_empty">Nothing imported yet. Tap + to add an image.</string>
+    <string name="crosshair_removed">Removed</string>
+    <string name="import_failed">That file could not be read as an image.</string>
+    <string name="import_no_picker">No file picker available on this device.</string>
+    <string name="library_none">None yet</string>
+    <string name="library_n">%1$d imported</string>
+    <string name="need_an_image">Import an image to get started</string>
+</resources>
