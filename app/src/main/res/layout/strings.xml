@@ -69,7 +69,7 @@
 
     <!-- Image library -->
     <string name="your_crosshairs">Your crosshairs</string>
-    <string name="library_body">Import any PNG, WebP or JPG. Transparent PNGs work best. Images are copied into the app, so moving or deleting the original afterwards is fine.</string>
+    <string name="library_body">Import any PNG, WebP, JPG or animated GIF. Transparent PNGs work best. Images are copied into the app, so moving or deleting the original afterwards is fine.</string>
     <string name="import_image">Import image</string>
     <string name="imported_crosshair">Imported crosshair</string>
     <string name="picker_empty">Nothing imported yet. Tap + to add an image.</string>
