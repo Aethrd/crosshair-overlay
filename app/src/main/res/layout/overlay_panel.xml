@@ -1,0 +1,326 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/panel_root"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:id="@+id/panel_card"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:background="@drawable/bg_panel"
+        android:elevation="20dp"
+        android:orientation="vertical"
+        android:paddingStart="16dp"
+        android:paddingTop="14dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="16dp">
+
+        <!-- Header -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:id="@+id/panel_icon"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:contentDescription="@null"
+                android:src="@drawable/ch_01" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:layout_weight="1"
+                android:letterSpacing="0.20"
+                android:text="@string/panel_title"
+                android:textAllCaps="true"
+                android:textColor="@color/text"
+                android:textSize="12sp"
+                android:fontFamily="sans-serif-medium" />
+
+            <ImageView
+                android:id="@+id/panel_close"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:background="@drawable/bg_round_ghost"
+                android:clickable="true"
+                android:contentDescription="@string/close"
+                android:focusable="true"
+                android:padding="7dp"
+                android:src="@drawable/ic_close" />
+        </LinearLayout>
+
+        <!-- Style picker -->
+        <TextView
+            style="@style/Label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/label_style" />
+
+        <HorizontalScrollView
+            android:id="@+id/picker_scroll"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:clipToPadding="false"
+            android:scrollbars="none">
+
+            <LinearLayout
+                android:id="@+id/picker_row"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal" />
+        </HorizontalScrollView>
+
+        <!-- Size -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="18dp"
+            android:baselineAligned="false"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                style="@style/Label"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/label_size" />
+
+            <TextView
+                android:id="@+id/value_size"
+                style="@style/Readout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+
+        <SeekBar
+            android:id="@+id/seek_size"
+            style="@style/Slider" />
+
+        <!-- Opacity -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:baselineAligned="false"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                style="@style/Label"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/label_opacity" />
+
+            <TextView
+                android:id="@+id/value_opacity"
+                style="@style/Readout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+
+        <SeekBar
+            android:id="@+id/seek_opacity"
+            style="@style/Slider" />
+
+        <TextView
+            android:id="@+id/opacity_warning"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:lineSpacingExtra="2dp"
+            android:text="@string/opacity_warning"
+            android:textColor="@color/danger"
+            android:textSize="11sp"
+            android:visibility="gone" />
+
+        <!-- Horizontal position -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:baselineAligned="false"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                style="@style/Label"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/label_x" />
+
+            <TextView
+                android:id="@+id/value_x"
+                style="@style/Readout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/step_x_minus"
+                android:layout_width="34dp"
+                android:layout_height="34dp"
+                android:background="@drawable/bg_step"
+                android:clickable="true"
+                android:contentDescription="@string/decrease"
+                android:focusable="true"
+                android:gravity="center"
+                android:text="−"
+                android:textColor="@color/text"
+                android:textSize="17sp" />
+
+            <SeekBar
+                android:id="@+id/seek_x"
+                style="@style/Slider"
+                android:layout_width="0dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_weight="1" />
+
+            <TextView
+                android:id="@+id/step_x_plus"
+                android:layout_width="34dp"
+                android:layout_height="34dp"
+                android:background="@drawable/bg_step"
+                android:clickable="true"
+                android:contentDescription="@string/increase"
+                android:focusable="true"
+                android:gravity="center"
+                android:text="+"
+                android:textColor="@color/text"
+                android:textSize="17sp" />
+        </LinearLayout>
+
+        <!-- Vertical position -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:baselineAligned="false"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                style="@style/Label"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/label_y" />
+
+            <TextView
+                android:id="@+id/value_y"
+                style="@style/Readout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/step_y_minus"
+                android:layout_width="34dp"
+                android:layout_height="34dp"
+                android:background="@drawable/bg_step"
+                android:clickable="true"
+                android:contentDescription="@string/decrease"
+                android:focusable="true"
+                android:gravity="center"
+                android:text="−"
+                android:textColor="@color/text"
+                android:textSize="17sp" />
+
+            <SeekBar
+                android:id="@+id/seek_y"
+                style="@style/Slider"
+                android:layout_width="0dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_weight="1" />
+
+            <TextView
+                android:id="@+id/step_y_plus"
+                android:layout_width="34dp"
+                android:layout_height="34dp"
+                android:background="@drawable/bg_step"
+                android:clickable="true"
+                android:contentDescription="@string/increase"
+                android:focusable="true"
+                android:gravity="center"
+                android:text="+"
+                android:textColor="@color/text"
+                android:textSize="17sp" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/move_hint"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:lineSpacingExtra="2dp"
+            android:text="@string/move_hint"
+            android:textColor="@color/ice"
+            android:textSize="12sp"
+            android:visibility="gone" />
+
+        <!-- Actions -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:baselineAligned="false"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/btn_visible"
+                style="@style/Pill"
+                android:layout_width="0dp"
+                android:layout_marginEnd="8dp"
+                android:layout_weight="1.4"
+                android:text="@string/crosshair_on" />
+
+            <TextView
+                android:id="@+id/btn_move"
+                style="@style/Pill"
+                android:layout_width="0dp"
+                android:layout_marginEnd="8dp"
+                android:layout_weight="1"
+                android:text="@string/move" />
+
+            <TextView
+                android:id="@+id/btn_center"
+                style="@style/Pill"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:text="@string/center" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/btn_stop"
+            style="@style/Pill"
+            android:layout_width="match_parent"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/bg_pill_danger"
+            android:text="@string/stop"
+            android:textColor="@color/danger" />
+    </LinearLayout>
+</FrameLayout>

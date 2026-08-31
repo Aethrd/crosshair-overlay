@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Palette pulled from the sigil artwork: void black, violet, magenta, ice. -->
+    <color name="void_bg">#07060C</color>
+    <color name="surface">#14101F</color>
+    <color name="surface_high">#1D1730</color>
+    <color name="panel">#F2110D1A</color>
+
+    <color name="accent">#FF6EC7</color>
+    <color name="accent_soft">#B57BFF</color>
+    <color name="ice">#8FD9FF</color>
+
+    <color name="text">#EFEAF9</color>
+    <color name="muted">#8B83A8</color>
+    <color name="danger">#FF5C7A</color>
+
+    <color name="hairline">#33B57BFF</color>
+    <color name="track">#26FFFFFF</color>
+    <color name="ghost">#14FFFFFF</color>
+    <color name="ghost_high">#22FFFFFF</color>
+    <color name="thumb_selected">#33FF6EC7</color>
+</resources>

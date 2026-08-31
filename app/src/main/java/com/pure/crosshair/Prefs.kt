@@ -1,0 +1,84 @@
+package com.pure.crosshair
+
+import android.content.Context
+import androidx.core.content.edit
+
+/**
+ * Every tunable in one place, so the panel, the two renderers and the boot receiver
+ * always read the same values.
+ */
+class Prefs(context: Context) {
+
+    private val sp = context.applicationContext
+        .getSharedPreferences("crosshair", Context.MODE_PRIVATE)
+
+    /** Index into [Catalog]. */
+    var index: Int
+        get() = sp.getInt(KEY_INDEX, 0).coerceIn(0, Catalog.size - 1)
+        set(value) = sp.edit { putInt(KEY_INDEX, value.coerceIn(0, Catalog.size - 1)) }
+
+    /** Crosshair edge length in dp. */
+    var sizeDp: Int
+        get() = sp.getInt(KEY_SIZE, DEFAULT_SIZE).coerceIn(MIN_SIZE, MAX_SIZE)
+        set(value) = sp.edit { putInt(KEY_SIZE, value.coerceIn(MIN_SIZE, MAX_SIZE)) }
+
+    /** 5..100. At 100 the crosshair is fully solid; it stays click-through either way. */
+    var opacity: Int
+        get() = sp.getInt(KEY_OPACITY, 100).coerceIn(MIN_OPACITY, 100)
+        set(value) = sp.edit { putInt(KEY_OPACITY, value.coerceIn(MIN_OPACITY, 100)) }
+
+    /** Pixel offset from the exact centre of the screen. */
+    var offsetX: Int
+        get() = sp.getInt(KEY_X, 0)
+        set(value) = sp.edit { putInt(KEY_X, value) }
+
+    var offsetY: Int
+        get() = sp.getInt(KEY_Y, 0)
+        set(value) = sp.edit { putInt(KEY_Y, value) }
+
+    var visible: Boolean
+        get() = sp.getBoolean(KEY_VISIBLE, true)
+        set(value) = sp.edit { putBoolean(KEY_VISIBLE, value) }
+
+    var buttonX: Int
+        get() = sp.getInt(KEY_BTN_X, Int.MIN_VALUE)
+        set(value) = sp.edit { putInt(KEY_BTN_X, value) }
+
+    var buttonY: Int
+        get() = sp.getInt(KEY_BTN_Y, Int.MIN_VALUE)
+        set(value) = sp.edit { putInt(KEY_BTN_Y, value) }
+
+    var startOnBoot: Boolean
+        get() = sp.getBoolean(KEY_BOOT, false)
+        set(value) = sp.edit { putBoolean(KEY_BOOT, value) }
+
+    /** Render through the accessibility service so the crosshair outranks other overlays. */
+    var maxPriority: Boolean
+        get() = sp.getBoolean(KEY_MAX_PRIORITY, false)
+        set(value) = sp.edit { putBoolean(KEY_MAX_PRIORITY, value) }
+
+    fun resetPlacement() {
+        sp.edit {
+            putInt(KEY_X, 0)
+            putInt(KEY_Y, 0)
+        }
+    }
+
+    companion object {
+        const val MIN_SIZE = 16
+        const val MAX_SIZE = 480
+        const val DEFAULT_SIZE = 72
+        const val MIN_OPACITY = 5
+
+        private const val KEY_INDEX = "index"
+        private const val KEY_SIZE = "size_dp"
+        private const val KEY_OPACITY = "opacity"
+        private const val KEY_X = "offset_x"
+        private const val KEY_Y = "offset_y"
+        private const val KEY_VISIBLE = "visible"
+        private const val KEY_BTN_X = "button_x"
+        private const val KEY_BTN_Y = "button_y"
+        private const val KEY_BOOT = "start_on_boot"
+        private const val KEY_MAX_PRIORITY = "max_priority"
+    }
+}
